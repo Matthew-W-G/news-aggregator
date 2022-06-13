@@ -1,0 +1,20 @@
+{% extends "news/base.html" %}
+{% block content%}
+    <article class="media content-section">
+        <div>
+            {% for n in NewsPiece%}
+                <div>
+                    <h1>
+                        {{ n.title }}
+                    </h1>
+                    <h2>
+                        {{ n.blurb }}
+                    </h2>
+                    <h3>
+                        {{ n.source }}
+                    </h3>
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+{% endblock content%}
