@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import ListView
 from .models import NewsPiece
+from .models import HeadlineBasket
 import json, requests
 from newsapi.newsapi_client import NewsApiClient
 
@@ -10,21 +11,24 @@ class NewsPieceListView(ListView):
                                           language='en',
                                           country='us')
 
+
+    headline_articles = HeadlineBasket(title="Headlines").save()
+
+
     for ar in top_headlines.get('articles'):
-        NewsPiece(title=ar.get('title'), blurb=ar.get('description'), source=ar.get('source').get('name')).save()
-        #news2.title = ar['title']
-        #news2.blurb = ar['description']
-        #news2.source = ar['source']
-        #news2.save()
+        NewsPiece(title=ar.get('title'),
+                blurb=ar.get('description'),
+                source=ar.get('source').get('name'),
+                url=ar.get('url'),
+                date=ar.get('publishedAt'),
+                headline=headline_articles
+                ).save()
 
     model = NewsPiece
     context_object_name = 'NewsPiece'
 
-def gather_news():
-    news1 = NewsPiece()
-    news1.title = "Antarctica explodes"
-    news1.blurb = "It was wild when it happened"
-    news1.source = "The Onion"
+
+
 
 
 
