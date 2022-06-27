@@ -1,55 +1,87 @@
-from django.shortcuts import render
 from django.views.generic import ListView
 from .models import NewsPiece
-from .models import HeadlineBasket
-import json, requests
 from newsapi.newsapi_client import NewsApiClient
 from datetime import datetime, timezone
 from dateutil import parser
-
+from news import news_logic
 newsapi = NewsApiClient(api_key='92c75fd3c7704a00b972bbc242b9907c')
 
-class NewsPieceListView(ListView):
-    top_headlines = newsapi.get_top_headlines(language='en', country='us')
 
+class HomeListView(ListView):
+    news_logic.remove_outdated('Front page')
 
-    top_headline_articles = HeadlineBasket(title="Top Headlines")
-    top_headline_articles.save()
+    new_front_headlines = newsapi.get_top_headlines(language='en', country='us').get('articles')
 
+    news_logic.add_articles(new_front_headlines, 'Front page')
 
-    for ar in top_headlines.get('articles'):
-        if ar.get('title') not in str(top_headline_articles.newspiece_set.all()):
-            NewsPiece(title=ar.get('title'),
-                    blurb=ar.get('description'),
-                    source=ar.get('source').get('name'),
-                    url=ar.get('url'),
-                    date=ar.get('publishedAt'),
-                    headline=top_headline_articles
-                    ).save()
-
-
-    for ar in top_headline_articles.newspiece_set.all():
-        datetime_object = parser.parse(ar.date)
-        time_since_publish = datetime.now(timezone.utc) - datetime_object
-        if time_since_publish.days >= 1:
-            ar.delete()
-
-
-    queryset = top_headline_articles.newspiece_set.all()
+    queryset = NewsPiece.objects.filter(category = 'Front page')
     model = NewsPiece
     context_object_name = 'NewsPiece'
 
 
 
-class EconomyListView(ListView):
-    model = NewsPiece
-
-
 class PoliticsListView(ListView):
+    news_logic.remove_outdated('Politics')
+
+    new_politics_headlines = newsapi.get_everything(q='Biden Trump Senate Congress Obama Supreme Court D.C. Election'
+                                                    , language='en').get('articles')
+
+    news_logic.add_articles(new_politics_headlines, 'Politics')
+
+    queryset = NewsPiece.objects.filter(category = 'Politics')
+    model = NewsPiece
+    context_object_name = 'NewsPiece'
+    template_name = 'news/NewsPiece_list.html'
+
+
+class BusinessListView(ListView):
+    news_logic.remove_outdated('Business')
+
+    new_front_headlines = newsapi.get_top_headlines(language='en', category='business', country='us').get('articles')
+
+    news_logic.add_articles(new_front_headlines, 'Business')
+
+    queryset = NewsPiece.objects.filter(category = 'Business')
+    model = NewsPiece
+    context_object_name = 'NewsPiece'
     model = NewsPiece
 
+class WorldListView(ListView):
+    news_logic.remove_outdated('World')
+    for ar in NewsPiece.objects.filter(category = 'World'):
+            ar.delete()
 
+    countries = ['ru', 'gb', 'fr', 'au', 'ch','hk', 'br','tw','gr', 'nz', 'jp']
+    for c in countries:
+        new_world_headlines = newsapi.get_top_headlines(language='en', category='general', country=c, page=2).get('articles')
+        news_logic.add_articles(new_world_headlines, 'World')
 
+    queryset = NewsPiece.objects.filter(category = 'World')
+    model = NewsPiece
+    context_object_name = 'NewsPiece'
+    model = NewsPiece
 
+class EntertainmentListView(ListView):
+    news_logic.remove_outdated('Entertainment')
 
+    new_front_headlines = newsapi.get_top_headlines(language='en', category='entertainment', country='us').get('articles')
+
+    news_logic.add_articles(new_front_headlines, 'Entertainment')
+
+    queryset = NewsPiece.objects.filter(category = 'Entertainment')
+    model = NewsPiece
+    context_object_name = 'NewsPiece'
+    model = NewsPiece
+
+class OpinionListView(ListView):
+    news_logic.remove_outdated('Opinion')
+
+    new_politics_headlines = newsapi.get_everything(qintitle='Opinion', language='en').get('articles')
+
+    news_logic.add_articles(new_politics_headlines, 'Opinion')
+
+    queryset = NewsPiece.objects.filter(category = 'Opinion')
+    model = NewsPiece
+    context_object_name = 'NewsPiece'
+    template_name = 'news/NewsPiece_list.html'
 

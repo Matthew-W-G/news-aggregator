@@ -4,17 +4,20 @@
         <div>
             {% for n in NewsPiece%}
                 <div>
+                    <img class="pull-left" src="https://logo.clearbit.com/NewYorkTimes.com"/>
+                </div>
+                <div>
                     <h1>
-                        {{ n.title }}
+                        <a href="{{ n.url }}">
+                            {{ n.title }}
+                        </a>
                     </h1>
-                    <h2>
-                        {{ n.blurb }}
-                    </h2>
                     <h3>
-                        {{ n.source }}
+                        {{ n.blurb }}
                     </h3>
                 </div>
             {% endfor %}
         </div>
     </article>
 {% endblock content%}
+
